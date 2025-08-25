@@ -1,9 +1,10 @@
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class TelaPrincipal extends JFrame {
+
+    private final UsuarioController uc;
+    private final CategoriaController cc;
+    private final TarefaController tc;
 
     public TelaPrincipal() {
         setTitle("Gerenciador de Tarefas");
@@ -11,11 +12,16 @@ public class TelaPrincipal extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
+        // Instanciar controllers (os seus)
+        uc = new UsuarioController();
+        cc = new CategoriaController();
+        tc = new TarefaController();
+
         // Painel principal
         JPanel painel = new JPanel();
-        painel.setLayout(new GridLayout(4, 1, 10, 10));
+        painel.setLayout(new java.awt.GridLayout(4, 1, 10, 10));
 
-        // Botões de navegação
+        // Botões
         JButton btnUsuarios = new JButton("Gerenciar Usuários");
         JButton btnCategorias = new JButton("Gerenciar Categorias");
         JButton btnTarefas = new JButton("Gerenciar Tarefas");
@@ -25,20 +31,16 @@ public class TelaPrincipal extends JFrame {
         painel.add(btnCategorias);
         painel.add(btnTarefas);
         painel.add(btnSair);
-
         add(painel);
 
-        // Eventos dos botões
-        btnUsuarios.addActionListener(e -> JOptionPane.showMessageDialog(this, "Tela de Usuários"));
-        btnCategorias.addActionListener(e -> JOptionPane.showMessageDialog(this, "Tela de Categorias"));
-        btnTarefas.addActionListener(e -> JOptionPane.showMessageDialog(this, "Tela de Tarefas"));
+        // Abrir telas reais (sem JOptionPane)
+        btnUsuarios.addActionListener(e -> new TelaUsuarios(uc).setVisible(true));
+        btnCategorias.addActionListener(e -> new TelaCategorias(cc).setVisible(true));
+        btnTarefas.addActionListener(e -> new TelaTarefas(tc, uc, cc).setVisible(true));
         btnSair.addActionListener(e -> System.exit(0));
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            TelaPrincipal tela = new TelaPrincipal();
-            tela.setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new TelaPrincipal().setVisible(true));
     }
 }
