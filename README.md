@@ -1,6 +1,6 @@
 # 📝 Gerenciador de Tarefas (Projeto Final - POO)
 
-Este é um sistema simples de **Gerenciamento de Tarefas**
+Este é um sistema simples de **Gerenciamento de Tarefas** (INICIAR O PROGRAMA A PARTIR DE TelaPrincipal.java)
 
 ## 🚀 Funcionalidades
 
