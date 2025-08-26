@@ -1,71 +1,115 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class TelaCategorias extends JFrame {
-
-    private CategoriaController cc;
-    private DefaultListModel<Categoria> listaModel;
+    private final CategoriaController cc;
+    private JTable tabela;
+    private DefaultTableModel modelo;
+    private JTextField txtNome;
+    private JTextField txtCor;
 
     public TelaCategorias(CategoriaController cc) {
         this.cc = cc;
+
         setTitle("Gerenciar Categorias");
-        setSize(400, 300);
+        setSize(600, 420);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        JPanel painel = new JPanel(new BorderLayout());
+        setLayout(new BorderLayout());
 
-        listaModel = new DefaultListModel<>();
-        JList<Categoria> listaCategorias = new JList<>(listaModel);
-        atualizarLista();
-        painel.add(new JScrollPane(listaCategorias), BorderLayout.CENTER);
+        // Topo – formulário
+        JPanel topo = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topo.add(new JLabel("Nome:"));
+        txtNome = new JTextField(16);
+        topo.add(txtNome);
+        topo.add(new JLabel("Cor:"));
+        txtCor = new JTextField(10);
+        topo.add(txtCor);
 
-        JPanel botoes = new JPanel(new GridLayout(1, 3, 5, 5));
-        JButton btnAdd = new JButton("Adicionar");
+        JButton btnAdicionar = new JButton("Adicionar");
         JButton btnEditar = new JButton("Editar");
         JButton btnRemover = new JButton("Remover");
+        topo.add(btnAdicionar);
+        topo.add(btnEditar);
+        topo.add(btnRemover);
 
-        botoes.add(btnAdd);
-        botoes.add(btnEditar);
-        botoes.add(btnRemover);
-        painel.add(botoes, BorderLayout.SOUTH);
+        add(topo, BorderLayout.NORTH);
 
-        add(painel);
+        // Tabela
+        modelo = new DefaultTableModel(new Object[]{"ID", "Nome", "Cor"}, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override public Class<?> getColumnClass(int c) { return c == 0 ? Integer.class : String.class; }
+        };
+        tabela = new JTable(modelo);
+        add(new JScrollPane(tabela), BorderLayout.CENTER);
 
-        btnAdd.addActionListener(e -> {
-            String nome = JOptionPane.showInputDialog(this, "Nome:");
-            String cor = JOptionPane.showInputDialog(this, "Cor:");
-            if (nome != null && cor != null) {
-                int id = cc.listarCategorias().size() + 1;
-                cc.adicionarCategoria(new Categoria(id, nome, cor));
-                atualizarLista();
+        // Eventos
+        btnAdicionar.addActionListener(e -> {
+            String nome = txtNome.getText().trim();
+            String cor = txtCor.getText().trim();
+            if (nome.isEmpty() || cor.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Preencha nome e cor.");
+                return;
             }
+            int id = proximoIdCategoria();
+            Categoria cat = new Categoria(id, nome, cor);
+            cc.adicionarCategoria(cat);
+            limparCampos();
+            atualizarTabela();
         });
 
         btnEditar.addActionListener(e -> {
-            Categoria selecionado = listaCategorias.getSelectedValue();
-            if (selecionado != null) {
-                String nome = JOptionPane.showInputDialog(this, "Nome:", selecionado.getNome());
-                String cor = JOptionPane.showInputDialog(this, "Cor:", selecionado.getCor());
-                if (nome != null && cor != null) {
-                    cc.atualizarCategoria(selecionado.getId(), nome, cor);
-                    atualizarLista();
-                }
+            int row = tabela.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Selecione uma categoria para editar.");
+                return;
             }
+            int id = (Integer) modelo.getValueAt(row, 0);
+            String nomeAtual = (String) modelo.getValueAt(row, 1);
+            String corAtual = (String) modelo.getValueAt(row, 2);
+
+            String novoNome = JOptionPane.showInputDialog(this, "Nome:", nomeAtual);
+            if (novoNome == null) return;
+            String novaCor = JOptionPane.showInputDialog(this, "Cor:", corAtual);
+            if (novaCor == null) return;
+
+            cc.atualizarCategoria(id, novoNome.trim(), novaCor.trim());
+            atualizarTabela();
         });
 
         btnRemover.addActionListener(e -> {
-            Categoria selecionado = listaCategorias.getSelectedValue();
-            if (selecionado != null) {
-                cc.removerCategoria(selecionado.getId());
-                atualizarLista();
+            int row = tabela.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Selecione uma categoria para remover.");
+                return;
             }
+            int id = (Integer) modelo.getValueAt(row, 0);
+            cc.removerCategoria(id);
+            atualizarTabela();
         });
+
+        atualizarTabela();
     }
 
-    private void atualizarLista() {
-        listaModel.clear();
+    private int proximoIdCategoria() {
+        int max = 0;
         for (Categoria c : cc.listarCategorias()) {
-            listaModel.addElement(c);
+            if (c.getId() > max) max = c.getId();
+        }
+        return max + 1;
+    }
+
+    private void limparCampos() {
+        txtNome.setText("");
+        txtCor.setText("");
+    }
+
+    private void atualizarTabela() {
+        modelo.setRowCount(0);
+        for (Categoria c : cc.listarCategorias()) {
+            modelo.addRow(new Object[]{c.getId(), c.getNome(), c.getCor()});
         }
     }
 }

@@ -1,72 +1,115 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.List;
 
 public class TelaUsuarios extends JFrame {
-
-    private UsuarioController uc;
-    private DefaultListModel<Usuario> listaModel;
+    private final UsuarioController uc;
+    private JTable tabela;
+    private DefaultTableModel modelo;
+    private JTextField txtNome;
+    private JTextField txtEmail;
 
     public TelaUsuarios(UsuarioController uc) {
         this.uc = uc;
+
         setTitle("Gerenciar Usuários");
-        setSize(400, 300);
+        setSize(600, 420);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        JPanel painel = new JPanel(new BorderLayout());
+        setLayout(new BorderLayout());
 
-        listaModel = new DefaultListModel<>();
-        JList<Usuario> listaUsuarios = new JList<>(listaModel);
-        atualizarLista();
-        painel.add(new JScrollPane(listaUsuarios), BorderLayout.CENTER);
+        // Topo – formulário simples
+        JPanel topo = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topo.add(new JLabel("Nome:"));
+        txtNome = new JTextField(15);
+        topo.add(txtNome);
+        topo.add(new JLabel("Email:"));
+        txtEmail = new JTextField(18);
+        topo.add(txtEmail);
 
-        JPanel botoes = new JPanel(new GridLayout(1, 3, 5, 5));
-        JButton btnAdd = new JButton("Adicionar");
+        JButton btnAdicionar = new JButton("Adicionar");
         JButton btnEditar = new JButton("Editar");
         JButton btnRemover = new JButton("Remover");
+        topo.add(btnAdicionar);
+        topo.add(btnEditar);
+        topo.add(btnRemover);
 
-        botoes.add(btnAdd);
-        botoes.add(btnEditar);
-        botoes.add(btnRemover);
-        painel.add(botoes, BorderLayout.SOUTH);
+        add(topo, BorderLayout.NORTH);
 
-        add(painel);
+        // Centro – tabela
+        modelo = new DefaultTableModel(new Object[]{"ID", "Nome", "Email"}, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override public Class<?> getColumnClass(int c) { return c == 0 ? Integer.class : String.class; }
+        };
+        tabela = new JTable(modelo);
+        add(new JScrollPane(tabela), BorderLayout.CENTER);
 
-        btnAdd.addActionListener(e -> {
-            String nome = JOptionPane.showInputDialog(this, "Nome:");
-            String email = JOptionPane.showInputDialog(this, "Email:");
-            if (nome != null && email != null) {
-                int id = uc.listarUsuarios().size() + 1;
-                uc.adicionarUsuario(new Usuario(id, nome, email));
-                atualizarLista();
+        // Eventos
+        btnAdicionar.addActionListener(e -> {
+            String nome = txtNome.getText().trim();
+            String email = txtEmail.getText().trim();
+            if (nome.isEmpty() || email.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Preencha nome e email.");
+                return;
             }
+            int id = proximoIdUsuario();
+            Usuario u = new Usuario(id, nome, email);
+            uc.adicionarUsuario(u);
+            limparCampos();
+            atualizarTabela();
         });
 
         btnEditar.addActionListener(e -> {
-            Usuario selecionado = listaUsuarios.getSelectedValue();
-            if (selecionado != null) {
-                String nome = JOptionPane.showInputDialog(this, "Nome:", selecionado.getNome());
-                String email = JOptionPane.showInputDialog(this, "Email:", selecionado.getEmail());
-                if (nome != null && email != null) {
-                    uc.atualizarUsuario(selecionado.getId(), nome, email);
-                    atualizarLista();
-                }
+            int row = tabela.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Selecione um usuário para editar.");
+                return;
             }
+            int id = (Integer) modelo.getValueAt(row, 0);
+            String nomeAtual = (String) modelo.getValueAt(row, 1);
+            String emailAtual = (String) modelo.getValueAt(row, 2);
+
+            String novoNome = JOptionPane.showInputDialog(this, "Nome:", nomeAtual);
+            if (novoNome == null) return;
+            String novoEmail = JOptionPane.showInputDialog(this, "Email:", emailAtual);
+            if (novoEmail == null) return;
+
+            uc.atualizarUsuario(id, novoNome.trim(), novoEmail.trim());
+            atualizarTabela();
         });
 
         btnRemover.addActionListener(e -> {
-            Usuario selecionado = listaUsuarios.getSelectedValue();
-            if (selecionado != null) {
-                uc.removerUsuario(selecionado.getId());
-                atualizarLista();
+            int row = tabela.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Selecione um usuário para remover.");
+                return;
             }
+            int id = (Integer) modelo.getValueAt(row, 0);
+            uc.removerUsuario(id);
+            atualizarTabela();
         });
+
+        atualizarTabela();
     }
 
-    private void atualizarLista() {
-        listaModel.clear();
+    private int proximoIdUsuario() {
+        int max = 0;
         for (Usuario u : uc.listarUsuarios()) {
-            listaModel.addElement(u);
+            if (u.getId() > max) max = u.getId();
+        }
+        return max + 1;
+    }
+
+    private void limparCampos() {
+        txtNome.setText("");
+        txtEmail.setText("");
+    }
+
+    private void atualizarTabela() {
+        modelo.setRowCount(0);
+        for (Usuario u : uc.listarUsuarios()) {
+            modelo.addRow(new Object[]{u.getId(), u.getNome(), u.getEmail()});
         }
     }
 }
