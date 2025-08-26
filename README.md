@@ -1,1 +1,19 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/vZir-ywQ)
+# 📝 Gerenciador de Tarefas (Projeto Final - POO)
+
+Este é um sistema simples de **Gerenciamento de Tarefas**
+
+## 🚀 Funcionalidades
+
+- **Usuários**
+  - Criar, listar, atualizar e remover usuários.
+- **Categorias**
+  - Criar, listar, atualizar e remover categorias de tarefas.
+- **Tarefas**
+  - Criar, listar, atualizar e remover tarefas.
+  - Cada tarefa pertence a um usuário e a uma categoria.
+- **Persistência**
+  - Os dados são salvos em arquivos (`.dat`) utilizando `Serializable`.
+  - Ao reiniciar o sistema, os dados são carregados novamente.
+- **Interface gráfica**
+  - Desenvolvida com `javax.swing`.
+  - Tela principal para navegação entre Usuários, Categorias e Tarefas.
