@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-public class Usuario implements Serializable{
+public class Usuario implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int id;
@@ -13,7 +13,7 @@ public class Usuario implements Serializable{
         this.email = email;
     }
 
-    // Getters e Setters
+    // getters e setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -25,6 +25,6 @@ public class Usuario implements Serializable{
 
     @Override
     public String toString() {
-        return id + " - " + nome + " (" + email + ")";
+        return nome;
     }
 }

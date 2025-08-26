@@ -1,15 +1,16 @@
-import java.util.ArrayList;
 import java.util.List;
 
 public class CategoriaController {
     private List<Categoria> categorias;
+    private final String arquivo = "categorias.dat";
 
     public CategoriaController() {
-        categorias = new ArrayList<>();
+        categorias = ArquivoDAO.carregar(arquivo);
     }
 
     public void adicionarCategoria(Categoria c) {
         categorias.add(c);
+        ArquivoDAO.salvar(categorias, arquivo);
     }
 
     public List<Categoria> listarCategorias() {
@@ -21,6 +22,7 @@ public class CategoriaController {
             if (c.getId() == id) {
                 c.setNome(nome);
                 c.setCor(cor);
+                ArquivoDAO.salvar(categorias, arquivo);
                 return true;
             }
         }
@@ -28,6 +30,8 @@ public class CategoriaController {
     }
 
     public boolean removerCategoria(int id) {
-        return categorias.removeIf(c -> c.getId() == id);
+        boolean removed = categorias.removeIf(c -> c.getId() == id);
+        if (removed) ArquivoDAO.salvar(categorias, arquivo);
+        return removed;
     }
 }

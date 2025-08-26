@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-public class Categoria implements Serializable{
+public class Categoria implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int id;
@@ -13,7 +13,6 @@ public class Categoria implements Serializable{
         this.cor = cor;
     }
 
-    // Getters e Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -25,6 +24,6 @@ public class Categoria implements Serializable{
 
     @Override
     public String toString() {
-        return id + " - " + nome + " [" + cor + "]";
+        return nome;
     }
 }

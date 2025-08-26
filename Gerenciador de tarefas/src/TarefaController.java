@@ -1,15 +1,16 @@
-import java.util.ArrayList;
 import java.util.List;
 
 public class TarefaController {
     private List<Tarefa> tarefas;
+    private final String arquivo = "tarefas.dat";
 
     public TarefaController() {
-        tarefas = new ArrayList<>();
+        tarefas = ArquivoDAO.carregar(arquivo);
     }
 
     public void adicionarTarefa(Tarefa t) {
         tarefas.add(t);
+        ArquivoDAO.salvar(tarefas, arquivo);
     }
 
     public List<Tarefa> listarTarefas() {
@@ -23,6 +24,7 @@ public class TarefaController {
                 t.setDescricao(descricao);
                 t.setPrioridade(prioridade);
                 t.setConcluida(concluida);
+                ArquivoDAO.salvar(tarefas, arquivo);
                 return true;
             }
         }
@@ -30,6 +32,8 @@ public class TarefaController {
     }
 
     public boolean removerTarefa(int id) {
-        return tarefas.removeIf(t -> t.getId() == id);
+        boolean removed = tarefas.removeIf(t -> t.getId() == id);
+        if (removed) ArquivoDAO.salvar(tarefas, arquivo);
+        return removed;
     }
 }

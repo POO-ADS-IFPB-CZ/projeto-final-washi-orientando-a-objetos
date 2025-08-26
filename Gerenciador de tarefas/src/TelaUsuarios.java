@@ -16,10 +16,9 @@ public class TelaUsuarios extends JFrame {
         setSize(600, 420);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
         setLayout(new BorderLayout());
 
-        // Topo – formulário simples
+        // form
         JPanel topo = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topo.add(new JLabel("Nome:"));
         txtNome = new JTextField(15);
@@ -37,7 +36,7 @@ public class TelaUsuarios extends JFrame {
 
         add(topo, BorderLayout.NORTH);
 
-        // Centro – tabela
+        // tabela
         modelo = new DefaultTableModel(new Object[]{"ID", "Nome", "Email"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
             @Override public Class<?> getColumnClass(int c) { return c == 0 ? Integer.class : String.class; }
@@ -45,7 +44,7 @@ public class TelaUsuarios extends JFrame {
         tabela = new JTable(modelo);
         add(new JScrollPane(tabela), BorderLayout.CENTER);
 
-        // Eventos
+        // eventos
         btnAdicionar.addActionListener(e -> {
             String nome = txtNome.getText().trim();
             String email = txtEmail.getText().trim();
@@ -62,29 +61,19 @@ public class TelaUsuarios extends JFrame {
 
         btnEditar.addActionListener(e -> {
             int row = tabela.getSelectedRow();
-            if (row < 0) {
-                JOptionPane.showMessageDialog(this, "Selecione um usuário para editar.");
-                return;
-            }
+            if (row < 0) { JOptionPane.showMessageDialog(this, "Selecione um usuário."); return; }
             int id = (Integer) modelo.getValueAt(row, 0);
-            String nomeAtual = (String) modelo.getValueAt(row, 1);
-            String emailAtual = (String) modelo.getValueAt(row, 2);
-
-            String novoNome = JOptionPane.showInputDialog(this, "Nome:", nomeAtual);
+            String novoNome = JOptionPane.showInputDialog(this, "Nome:", modelo.getValueAt(row,1));
             if (novoNome == null) return;
-            String novoEmail = JOptionPane.showInputDialog(this, "Email:", emailAtual);
+            String novoEmail = JOptionPane.showInputDialog(this, "Email:", modelToString(modelo.getValueAt(row,2)));
             if (novoEmail == null) return;
-
             uc.atualizarUsuario(id, novoNome.trim(), novoEmail.trim());
             atualizarTabela();
         });
 
         btnRemover.addActionListener(e -> {
             int row = tabela.getSelectedRow();
-            if (row < 0) {
-                JOptionPane.showMessageDialog(this, "Selecione um usuário para remover.");
-                return;
-            }
+            if (row < 0) { JOptionPane.showMessageDialog(this, "Selecione um usuário."); return; }
             int id = (Integer) modelo.getValueAt(row, 0);
             uc.removerUsuario(id);
             atualizarTabela();
@@ -93,18 +82,15 @@ public class TelaUsuarios extends JFrame {
         atualizarTabela();
     }
 
+    private String modelToString(Object o){ return o==null? "": o.toString(); }
+
     private int proximoIdUsuario() {
         int max = 0;
-        for (Usuario u : uc.listarUsuarios()) {
-            if (u.getId() > max) max = u.getId();
-        }
+        for (Usuario u : uc.listarUsuarios()) if (u.getId() > max) max = u.getId();
         return max + 1;
     }
 
-    private void limparCampos() {
-        txtNome.setText("");
-        txtEmail.setText("");
-    }
+    private void limparCampos() { txtNome.setText(""); txtEmail.setText(""); }
 
     private void atualizarTabela() {
         modelo.setRowCount(0);

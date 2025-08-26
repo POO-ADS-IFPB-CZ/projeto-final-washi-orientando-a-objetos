@@ -26,10 +26,8 @@ public class TelaTarefas extends JFrame {
         setSize(900, 480);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
         setLayout(new BorderLayout());
 
-        // Topo – formulário
         JPanel topo = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         topo.add(new JLabel("Título:"));
@@ -64,7 +62,6 @@ public class TelaTarefas extends JFrame {
 
         add(topo, BorderLayout.NORTH);
 
-        // Tabela
         modelo = new DefaultTableModel(
                 new Object[]{"ID", "Título", "Descrição", "Prioridade", "Usuário", "Categoria", "Concluída"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -79,11 +76,9 @@ public class TelaTarefas extends JFrame {
         tabela = new JTable(modelo);
         add(new JScrollPane(tabela), BorderLayout.CENTER);
 
-        // Carrega combos e tabela
         carregarCombos();
         atualizarTabela();
 
-        // Eventos
         btnAdicionar.addActionListener(e -> {
             String titulo = txtTitulo.getText().trim();
             String desc = txtDescricao.getText().trim();
@@ -99,13 +94,8 @@ public class TelaTarefas extends JFrame {
 
             int id = proximoIdTarefa();
             Tarefa t = new Tarefa(id, titulo, desc, prioridade, usuario, categoria);
-            // se sua Tarefa tiver o campo concluida no construtor, ajuste; senão, atualizamos após criar:
-            if (concluida) {
-                tc.adicionarTarefa(t);
-                tc.atualizarTarefa(id, titulo, desc, prioridade, true);
-            } else {
-                tc.adicionarTarefa(t);
-            }
+            tc.adicionarTarefa(t);
+            if (concluida) tc.atualizarTarefa(id, titulo, desc, prioridade, true);
 
             limparCampos();
             atualizarTabela();
@@ -113,29 +103,18 @@ public class TelaTarefas extends JFrame {
 
         btnEditar.addActionListener(e -> {
             int row = tabela.getSelectedRow();
-            if (row < 0) {
-                JOptionPane.showMessageDialog(this, "Selecione uma tarefa para editar.");
-                return;
-            }
+            if (row < 0) { JOptionPane.showMessageDialog(this, "Selecione uma tarefa."); return; }
             int id = (Integer) modelo.getValueAt(row, 0);
 
-            String atualTitulo = (String) modelo.getValueAt(row, 1);
-            String atualDesc = (String) modelo.getValueAt(row, 2);
-            String atualPrioridade = (String) modelo.getValueAt(row, 3);
-            boolean atualConcluida = (Boolean) modelo.getValueAt(row, 6);
-
-            String novoTitulo = JOptionPane.showInputDialog(this, "Título:", atualTitulo);
+            String novoTitulo = JOptionPane.showInputDialog(this, "Título:", modelo.getValueAt(row,1));
             if (novoTitulo == null) return;
-            String novaDesc = JOptionPane.showInputDialog(this, "Descrição:", atualDesc);
+            String novaDesc = JOptionPane.showInputDialog(this, "Descrição:", modelToString(modelo.getValueAt(row,2)));
             if (novaDesc == null) return;
-            String[] ops = {"Baixa", "Média", "Alta"};
-            String novaPrioridade = (String) JOptionPane.showInputDialog(
-                    this, "Prioridade:", "Editar Prioridade",
-                    JOptionPane.PLAIN_MESSAGE, null, ops, atualPrioridade);
+            String[] ops = {"Baixa","Média","Alta"};
+            String novaPrioridade = (String) JOptionPane.showInputDialog(this, "Prioridade:", "Editar", JOptionPane.PLAIN_MESSAGE, null, ops, modelToString(modelo.getValueAt(row,3)));
             if (novaPrioridade == null) return;
 
-            int resp = JOptionPane.showConfirmDialog(this, "Marcar como concluída?", "Concluída",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            int resp = JOptionPane.showConfirmDialog(this, "Marcar como concluída?", "Concluída", JOptionPane.YES_NO_OPTION);
             boolean novaConcluida = (resp == JOptionPane.YES_OPTION);
 
             tc.atualizarTarefa(id, novoTitulo.trim(), novaDesc.trim(), novaPrioridade, novaConcluida);
@@ -144,33 +123,26 @@ public class TelaTarefas extends JFrame {
 
         btnRemover.addActionListener(e -> {
             int row = tabela.getSelectedRow();
-            if (row < 0) {
-                JOptionPane.showMessageDialog(this, "Selecione uma tarefa para remover.");
-                return;
-            }
+            if (row < 0) { JOptionPane.showMessageDialog(this, "Selecione uma tarefa."); return; }
             int id = (Integer) modelo.getValueAt(row, 0);
             tc.removerTarefa(id);
             atualizarTabela();
         });
     }
 
+    private String modelToString(Object o){ return o==null? "": o.toString(); }
+
     private int proximoIdTarefa() {
         int max = 0;
-        for (Tarefa t : tc.listarTarefas()) {
-            if (t.getId() > max) max = t.getId();
-        }
+        for (Tarefa t : tc.listarTarefas()) if (t.getId() > max) max = t.getId();
         return max + 1;
     }
 
     private void carregarCombos() {
         cbUsuario.removeAllItems();
-        for (Usuario u : uc.listarUsuarios()) {
-            cbUsuario.addItem(u);
-        }
+        for (Usuario u : uc.listarUsuarios()) cbUsuario.addItem(u);
         cbCategoria.removeAllItems();
-        for (Categoria c : cc.listarCategorias()) {
-            cbCategoria.addItem(c);
-        }
+        for (Categoria c : cc.listarCategorias()) cbCategoria.addItem(c);
     }
 
     private void limparCampos() {
@@ -185,19 +157,10 @@ public class TelaTarefas extends JFrame {
     private void atualizarTabela() {
         modelo.setRowCount(0);
         for (Tarefa t : tc.listarTarefas()) {
-            String nomeUsuario = (t.getUsuario() != null) ? t.getUsuario().getNome() : "";
-            String nomeCategoria = (t.getCategoria() != null) ? t.getCategoria().getNome() : "";
-            modelo.addRow(new Object[]{
-                    t.getId(),
-                    t.getTitulo(),
-                    t.getDescricao(),
-                    t.getPrioridade(),
-                    nomeUsuario,
-                    nomeCategoria,
-                    t.isConcluida()
-            });
+            String nomeUsuario = t.getUsuario() != null ? t.getUsuario().getNome() : "";
+            String nomeCategoria = t.getCategoria() != null ? t.getCategoria().getNome() : "";
+            modelo.addRow(new Object[]{t.getId(), t.getTitulo(), t.getDescricao(), t.getPrioridade(), nomeUsuario, nomeCategoria, t.isConcluida()});
         }
-        // manter combos sincronizados com possíveis mudanças externas
         carregarCombos();
     }
 }

@@ -1,7 +1,6 @@
 import javax.swing.*;
 
 public class TelaPrincipal extends JFrame {
-
     private final UsuarioController uc;
     private final CategoriaController cc;
     private final TarefaController tc;
@@ -12,16 +11,14 @@ public class TelaPrincipal extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Instanciar controllers (os seus)
+        // controllers (únicos do app)
         uc = new UsuarioController();
         cc = new CategoriaController();
         tc = new TarefaController();
 
-        // Painel principal
         JPanel painel = new JPanel();
         painel.setLayout(new java.awt.GridLayout(4, 1, 10, 10));
 
-        // Botões
         JButton btnUsuarios = new JButton("Gerenciar Usuários");
         JButton btnCategorias = new JButton("Gerenciar Categorias");
         JButton btnTarefas = new JButton("Gerenciar Tarefas");
@@ -31,9 +28,9 @@ public class TelaPrincipal extends JFrame {
         painel.add(btnCategorias);
         painel.add(btnTarefas);
         painel.add(btnSair);
+
         add(painel);
 
-        // Abrir telas reais (sem JOptionPane)
         btnUsuarios.addActionListener(e -> new TelaUsuarios(uc).setVisible(true));
         btnCategorias.addActionListener(e -> new TelaCategorias(cc).setVisible(true));
         btnTarefas.addActionListener(e -> new TelaTarefas(tc, uc, cc).setVisible(true));

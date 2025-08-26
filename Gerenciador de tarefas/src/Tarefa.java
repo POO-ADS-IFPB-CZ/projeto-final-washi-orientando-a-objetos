@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-public class Tarefa implements Serializable{
+public class Tarefa implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int id;
@@ -21,7 +21,7 @@ public class Tarefa implements Serializable{
         this.categoria = categoria;
     }
 
-    // Getters e Setters
+    // getters e setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -45,7 +45,6 @@ public class Tarefa implements Serializable{
 
     @Override
     public String toString() {
-        return id + " - " + titulo + " (" + prioridade + ") - "
-                + (concluida ? "Concluída" : "Pendente");
+        return titulo + (concluida ? " (Concluída)" : "");
     }
 }

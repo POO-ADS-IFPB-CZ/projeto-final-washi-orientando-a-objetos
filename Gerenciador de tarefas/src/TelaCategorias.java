@@ -16,10 +16,8 @@ public class TelaCategorias extends JFrame {
         setSize(600, 420);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
         setLayout(new BorderLayout());
 
-        // Topo – formulário
         JPanel topo = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topo.add(new JLabel("Nome:"));
         txtNome = new JTextField(16);
@@ -37,7 +35,6 @@ public class TelaCategorias extends JFrame {
 
         add(topo, BorderLayout.NORTH);
 
-        // Tabela
         modelo = new DefaultTableModel(new Object[]{"ID", "Nome", "Cor"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
             @Override public Class<?> getColumnClass(int c) { return c == 0 ? Integer.class : String.class; }
@@ -45,14 +42,10 @@ public class TelaCategorias extends JFrame {
         tabela = new JTable(modelo);
         add(new JScrollPane(tabela), BorderLayout.CENTER);
 
-        // Eventos
         btnAdicionar.addActionListener(e -> {
             String nome = txtNome.getText().trim();
             String cor = txtCor.getText().trim();
-            if (nome.isEmpty() || cor.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Preencha nome e cor.");
-                return;
-            }
+            if (nome.isEmpty() || cor.isEmpty()) { JOptionPane.showMessageDialog(this, "Preencha nome e cor."); return; }
             int id = proximoIdCategoria();
             Categoria cat = new Categoria(id, nome, cor);
             cc.adicionarCategoria(cat);
@@ -62,29 +55,19 @@ public class TelaCategorias extends JFrame {
 
         btnEditar.addActionListener(e -> {
             int row = tabela.getSelectedRow();
-            if (row < 0) {
-                JOptionPane.showMessageDialog(this, "Selecione uma categoria para editar.");
-                return;
-            }
+            if (row < 0) { JOptionPane.showMessageDialog(this, "Selecione uma categoria."); return; }
             int id = (Integer) modelo.getValueAt(row, 0);
-            String nomeAtual = (String) modelo.getValueAt(row, 1);
-            String corAtual = (String) modelo.getValueAt(row, 2);
-
-            String novoNome = JOptionPane.showInputDialog(this, "Nome:", nomeAtual);
+            String novoNome = JOptionPane.showInputDialog(this, "Nome:", modelo.getValueAt(row,1));
             if (novoNome == null) return;
-            String novaCor = JOptionPane.showInputDialog(this, "Cor:", corAtual);
+            String novaCor = JOptionPane.showInputDialog(this, "Cor:", modelToString(modelo.getValueAt(row,2)));
             if (novaCor == null) return;
-
             cc.atualizarCategoria(id, novoNome.trim(), novaCor.trim());
             atualizarTabela();
         });
 
         btnRemover.addActionListener(e -> {
             int row = tabela.getSelectedRow();
-            if (row < 0) {
-                JOptionPane.showMessageDialog(this, "Selecione uma categoria para remover.");
-                return;
-            }
+            if (row < 0) { JOptionPane.showMessageDialog(this, "Selecione uma categoria."); return; }
             int id = (Integer) modelo.getValueAt(row, 0);
             cc.removerCategoria(id);
             atualizarTabela();
@@ -93,18 +76,15 @@ public class TelaCategorias extends JFrame {
         atualizarTabela();
     }
 
+    private String modelToString(Object o){ return o==null? "": o.toString(); }
+
     private int proximoIdCategoria() {
         int max = 0;
-        for (Categoria c : cc.listarCategorias()) {
-            if (c.getId() > max) max = c.getId();
-        }
+        for (Categoria c : cc.listarCategorias()) if (c.getId() > max) max = c.getId();
         return max + 1;
     }
 
-    private void limparCampos() {
-        txtNome.setText("");
-        txtCor.setText("");
-    }
+    private void limparCampos() { txtNome.setText(""); txtCor.setText(""); }
 
     private void atualizarTabela() {
         modelo.setRowCount(0);
