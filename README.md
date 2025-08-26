@@ -1,2 +1,19 @@
-Gerenciador de tarefas:
-Neste projeto será realizado um gerenciador de tarefas com funcionalidades de criar tarefas, marcar como concluída, editar ou excluir, associar tarefas à categorias, etc.
+# 📝 Gerenciador de Tarefas (Projeto Final - POO)
+
+Este é um sistema simples de **Gerenciamento de Tarefas**
+
+## 🚀 Funcionalidades
+
+- **Usuários**
+  - Criar, listar, atualizar e remover usuários.
+- **Categorias**
+  - Criar, listar, atualizar e remover categorias de tarefas.
+- **Tarefas**
+  - Criar, listar, atualizar e remover tarefas.
+  - Cada tarefa pertence a um usuário e a uma categoria.
+- **Persistência**
+  - Os dados são salvos em arquivos (`.dat`) utilizando `Serializable`.
+  - Ao reiniciar o sistema, os dados são carregados novamente.
+- **Interface gráfica**
+  - Desenvolvida com `javax.swing`.
+  - Tela principal para navegação entre Usuários, Categorias e Tarefas.
